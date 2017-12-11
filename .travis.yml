@@ -44,7 +44,4 @@ script:
   - make
 after_script:
   - ctest
-before_deploy:
   - cpack
-deploy:
-  skip_cleanup: true
