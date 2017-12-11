@@ -20,7 +20,7 @@ matrix:
             - pkg-config
             - cmake
       before_install:
-        - sudo apt-add-repository --yes ppa:beineri/opt-qt591-trusty
+        - sudo apt-add-repository --yes ppa:beineri/opt-qt593-trusty
         - sudo apt-get -qq update
       install:
         - sudo apt-get --yes install build-essential automake autoconf libtool pkg-config cmake
@@ -32,7 +32,7 @@ matrix:
 
 
     - os: osx
-      osx_image: xcode9
+      osx_image: xcode9.2
       compiler: clang
       before_install:
         - brew update
