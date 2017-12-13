@@ -4,6 +4,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QProcess>
 #include <QtCore/QDir>
+#include <QtCore/QString>
 #include <fdosettings.hpp>
 
 class DigiSigner : public QObject {

@@ -157,23 +157,44 @@ QString DigiSigner::getCertId() {
     QString rawOutput(process.readAll());
     QStringList lines = rawOutput.split('\n');
 
+    QList<QPair<QString, QString>> certificates;
     bool containsCertificate = false;
+    QString certificateLabel;
+    QString certificateId;
 
     for (const QString &line: lines) {
 
-        if (line.startsWith("Certificate Object") && line.contains("type = X.509 cert"))
+        if (line.startsWith("Certificate Object") && line.contains("type = X.509 cert")) {
+            certificateLabel.clear();
+            certificateId.clear();
             containsCertificate = true;
-        else if (!line.startsWith("  "))
+            continue;
+        } else if (!line.startsWith("  ")) {
             containsCertificate = false;
+        }
 
-        if (containsCertificate && line.startsWith("  ID:")) {
-            QStringList items = line.trimmed().split(':', QString::SkipEmptyParts);
+        if (containsCertificate) {
+            if (line.startsWith("  label:")) {
+                QStringList items = line.trimmed().split(':', QString::SkipEmptyParts);
+                if (items.length() == 2)
+                    certificateLabel = items[1].trimmed();
+            }
+            if (line.startsWith("  ID:")) {
+                QStringList items = line.trimmed().split(':', QString::SkipEmptyParts);
+                if (items.length() == 2)
+                    certificateId = items[1].trimmed();
+            }
 
-            if (items.length() == 2) {
-                QString certificateId = items[1].trimmed();
-                return certificateId;
+            if (certificateLabel.length() > 0 && certificateId.length() > 0) {
+                QPair<QString, QString> newCertificate(certificateLabel, certificateId);
+                certificates.append(newCertificate);
             }
         }
+    }
+
+    for (const QPair<QString, QString> &certificate: certificates) {
+        if (certificate.first.toLower().contains("firma"))
+            return certificate.second;
     }
 
     return "";
