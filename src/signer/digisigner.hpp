@@ -5,6 +5,7 @@
 #include <QtCore/QProcess>
 #include <QtCore/QDir>
 #include <QtCore/QString>
+#include <QtCore/QStringList>
 #include <fdosettings.hpp>
 
 class DigiSigner : public QObject {
@@ -29,7 +30,9 @@ private:
     QString certificate;
     QString pin;
 
-    static void waitForString(QProcess &process, const QString &text);
+    static QStringList readReponse(QProcess &process);
+
+    static bool responseContains(QStringList response, QString text);
 
 signals:
 

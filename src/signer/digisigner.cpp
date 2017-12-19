@@ -1,21 +1,16 @@
-#include <QtCore/QProcess>
-#include <QtNetwork/QSslCertificate>
-#include <QtCore/QFile>
-#include <QtCore/QTemporaryFile>
-
 #include "digisigner.hpp"
+
+#include <QtCore/QTemporaryFile>
+#include <QtCore/QThread>
+#include <QtNetwork/QSslCertificate>
+#include <iostream>
+
 
 DigiSigner::DigiSigner(QObject *parent) : QObject(parent) {
 
 }
 
 bool DigiSigner::initCard() {
-//    signerPKCS11Engine = PathUtility::discoverPkcsEngineLib();
-//    if (signerPKCS11Engine.length() == 0) {
-//        emit error("PKCS#11 Engine Library not found");
-//        return false;
-//    }
-
     certificateId = getCertId();
     if (certificateId.length() == 0) {
         emit error("Smart card not found");
@@ -33,6 +28,7 @@ void DigiSigner::setPin(const QString &pin) {
 
 QByteArray DigiSigner::cadesSign(const QByteArray &inputData) {
     FDOSettings *settings = FDOSettings::getInstance();
+    QStringList response;
 
     if (certificateId.length() == 0
         || certificate.length() == 0
@@ -42,32 +38,29 @@ QByteArray DigiSigner::cadesSign(const QByteArray &inputData) {
     }
 
     QString tempFilePrefix = QDir(QDir::tempPath()).absoluteFilePath("tmpdigisigner");
-//    std::string tempFilePrefixStr = tempFilePrefix.toStdString();
 
     QTemporaryFile crtFile(tempFilePrefix);
     crtFile.setAutoRemove(false);
     crtFile.open();
     crtFile.write(certificate.toLatin1());
     crtFile.close();
-//    std::string crtFileStr = crtFile.fileName().toStdString();
 
     QTemporaryFile inFile(tempFilePrefix);
     inFile.setAutoRemove(false);
     inFile.open();
     inFile.write(inputData);
     inFile.close();
-//    std::string inFileStr = inFile.fileName().toStdString();
 
     QTemporaryFile outFile(tempFilePrefix);
     outFile.setAutoRemove(false);
     outFile.open();
     outFile.close();
-//    std::string outFileStr = outFile.fileName().toStdString();
 
     QString engineName = "pkcs11";
 
     QStringList engineArgs;
     engineArgs << "engine";
+    engineArgs << "-t";
     engineArgs << "dynamic";
     engineArgs << "-pre" << QString("SO_PATH:%1").arg(settings->getPkcsEngineLib());
     engineArgs << "-pre" << QString("ID:%1").arg(engineName);
@@ -75,57 +68,104 @@ QByteArray DigiSigner::cadesSign(const QByteArray &inputData) {
     engineArgs << "-pre" << "LOAD";
     engineArgs << "-pre" << QString("MODULE_PATH:%1").arg(settings->getSmartcardLib());
     engineArgs << "-pre" << QString("PIN:%1").arg(pin);
+    engineArgs << "-pre" << "FORCE_LOGIN";
 
     QStringList smimeArgs;
-    smimeArgs << "smime";
+    smimeArgs << "cms";
+    smimeArgs << "-nosmimecap";
     smimeArgs << "-md" << "sha256";
     smimeArgs << "-nodetach";
     smimeArgs << "-binary";
+    smimeArgs << "-cades";
+    smimeArgs << "-stream";
     smimeArgs << "-outform" << "DER";
     smimeArgs << "-sign";
     smimeArgs << "-signer" << crtFile.fileName();
     smimeArgs << "-inkey" << QString("id_%1").arg(certificateId);
     smimeArgs << "-keyform" << "engine";
-    smimeArgs << "-engine" << engineName;
     smimeArgs << "-in" << inFile.fileName();
     smimeArgs << "-out" << outFile.fileName();
+    smimeArgs << "-engine" << engineName;
 
     QString engineCmd = engineArgs.join(" ") + "\n";
     QString smimeCmd = smimeArgs.join(" ") + "\n";
-
-//    std::string engineCmdStr = engineCmd.toStdString();
-//    std::string smimeCmdStr = smimeCmd.toStdString();
+    QString pinCmd = pin + "\n";
 
     emit progressStep("Starting OpenSSL");
     QProcess process;
-    process.setReadChannel(QProcess::StandardOutput);
     process.start(settings->getOpensslBin());
     process.waitForStarted();
 
-    waitForString(process, "OpenSSL>");
+    do {
+        response.clear();
+        response.append(readReponse(process));
+        if (!response.isEmpty()) {
+            if (responseContains(response, "OpenSSL>")) {
+                break;
+            } else {
+                emit error("Unable to start OpenSSL");
+                return QByteArray();
+            }
+        }
+    } while (!response.isEmpty());
 
     emit progressStep("Starting engine");
     process.write(engineCmd.toLatin1());
-    waitForString(process, "OpenSSL>");
+    process.waitForBytesWritten();
+
+    do {
+        response.clear();
+        response.append(readReponse(process));
+        if (!response.isEmpty()) {
+            if (responseContains(response, "OpenSSL>")) {
+                break;
+            } else if (responseContains(response, "unavailable")) {
+                emit error("Unable to start PKCS#11 OpenSSL Engine");
+                return QByteArray();
+            }
+        }
+    } while (!response.isEmpty());
+
+    QThread::msleep(500);
 
     emit progressStep("Signing file");
     process.write(smimeCmd.toLatin1());
-    waitForString(process, "OpenSSL>");
+    process.waitForBytesWritten();
+
+    do {
+        response.clear();
+        response.append(readReponse(process));
+        if (!response.isEmpty()) {
+            if (responseContains(response, "PIN")) {
+                break;
+            } else if (responseContains(response, "error in cms")) {
+                emit error("Unable to sign file");
+                return QByteArray();
+            }
+        }
+    } while (!response.isEmpty());
+
+    process.write(pinCmd.toLatin1());
+    process.waitForBytesWritten();
+
+    do {
+        response.clear();
+        response.append(readReponse(process));
+        if (!response.isEmpty()) {
+            if (responseContains(response, "OpenSSL>")) {
+                break;
+            } else if (responseContains(response, "PIN")) {
+                emit error("PIN NOT VALID");
+                return QByteArray();
+            }
+        }
+    } while (!response.isEmpty());
 
     QByteArray stdOut = process.readAllStandardOutput();
     QByteArray stdErr = process.readAllStandardError();
 
-//    std::string stdOutStr = QString(stdOut).toStdString();
-//    std::string stdErrStr = QString(stdErr).toStdString();
-
     process.terminate();
     process.waitForFinished();
-
-    if (stdErr.contains("Login failed")) {
-        process.readAll();
-        emit error("PIN NOT VALID");
-        return QByteArray();
-    }
 
     emit progressStep("Reading output");
     outFile.open();
@@ -226,14 +266,38 @@ QString DigiSigner::getCert(QString id) {
     return cert;
 }
 
-void DigiSigner::waitForString(QProcess &process, const QString &text) {
-    while (true) {
-        process.waitForReadyRead(250);
+QStringList DigiSigner::readReponse(QProcess &process) {
+    QByteArray rawData;
+    QByteArrayList lines;
+    QStringList response;
 
-        QByteArray data = process.readLine();
-        if (data.startsWith(text.toLatin1())) {
-            process.readAll();
-            break;
-        }
+    process.setReadChannel(QProcess::StandardOutput);
+    process.waitForReadyRead(250);
+    rawData = process.readAll();
+    rawData.replace('\r', '\n');
+    rawData.replace("\n\n", "\n");
+    lines.append(rawData.split('\n'));
+
+    process.setReadChannel(QProcess::StandardError);
+    process.waitForReadyRead(250);
+    rawData = process.readAll();
+    rawData.replace('\r', '\n');
+    rawData.replace("\n\n", "\n");
+    lines.append(rawData.split('\n'));
+
+    for (const QByteArray &line: lines)
+        response.append(QString(line));
+
+    return response;
+}
+
+bool DigiSigner::responseContains(QStringList response, QString text) {
+    for (const QString &item: response) {
+        std::string itemStr = item.toStdString();
+        std::cout << itemStr << "\n";
+        if (item.contains(text))
+            return true;
     }
+
+    return false;
 }
