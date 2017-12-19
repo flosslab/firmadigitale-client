@@ -116,6 +116,8 @@ bool OdooWorker::doAction(Action action) {
 
         if (actionToDo == "sign") {
             QByteArray signedContent = digiSigner.cadesSign(content);
+            if (signedContent.isEmpty())
+                return false;
 
             workerProgress(QString("Signed file is %1 bytes, uploading result to Odoo").arg(signedContent.length()));
 
