@@ -93,9 +93,9 @@ QString PathUtility::discoverSmartcardLib() {
     QStringList searchPath;
 
 #ifdef Q_OS_WIN32
-    searchPath.append(installDir.absoluteFilePath(FDOTOOL_OPENSSL_BINARY));
+    searchPath.append(installDir.absoluteFilePath(FDOTOOL_TOOLS_INSTALL_DIR));
 #elif Q_OS_MAC
-    searchPath.append(installDir.absoluteFilePath(FDOTOOL_OPENSSL_BINARY));
+    searchPath.append(installDir.absoluteFilePath(FDOTOOL_TOOLS_INSTALL_DIR));
 #else
     QDir installDir(FDOTOOL_TOOLS_INSTALL_DIR);
     searchPath.append(installDir.absoluteFilePath(FDOTOOL_TOOLS_SMARTCARD_LIB_NAME));
