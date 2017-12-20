@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     connect(ui->actionFileExit, SIGNAL(triggered(bool)), this, SLOT(close()));
     connect(ui->actionConfigEdit, SIGNAL(triggered(bool)), this, SIGNAL(showConfig()));
-    connect(ui->actionConfigReload, SIGNAL(triggered(bool)), certificateUtility, SLOT(updateSmartcardValues()));
+    connect(ui->actionConfigReload, SIGNAL(triggered(bool)), this, SLOT(updateSmartcardValues()));
 
     initLineEdits();
     updateToolsValues();
@@ -27,11 +27,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 MainWindow::~MainWindow() {
-    if(thread != nullptr && thread->isRunning()) {
-        thread->requestInterruption();
+    if (thread->isRunning()) {
+        thread->quit();
         thread->wait();
-        delete thread;
     }
+
+    delete thread;
 
     delete ui;
 }
@@ -71,7 +72,7 @@ void MainWindow::updateToolsValues() {
 
 void MainWindow::updateSmartcardValues() {
     updateLineEdit(ui->certIdValue);
-    QMetaObject::invokeMethod(certificateUtility, "getCertificateId", Qt::DirectConnection);
+    QMetaObject::invokeMethod(certificateUtility, "getCertificateId");
 }
 
 void MainWindow::handleNewCertificateId(QString certificateId) {
