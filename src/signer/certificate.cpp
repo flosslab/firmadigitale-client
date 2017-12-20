@@ -64,9 +64,9 @@ void CertificateUtility::getCertificateId() {
             emit newCertificateId(certificate.second);
             return;
         }
-
-        emit newCertificateId("");
     }
+
+    emit newCertificateId("");
 }
 
 void CertificateUtility::getCertificate(QString id) {
