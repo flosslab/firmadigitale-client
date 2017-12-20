@@ -43,8 +43,6 @@ private:
 
     void doWaitAndClose(bool wait = false);
 
-    void doMain();
-
     void doOdoo();
 
 private slots:

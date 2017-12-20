@@ -90,8 +90,6 @@ void FDOTool::parseCommandLine() {
 }
 
 int FDOTool::run() {
-    qDebug() << "RUN";
-
     switch (mode) {
 
         case MAIN:
@@ -102,10 +100,9 @@ int FDOTool::run() {
             connect(this, SIGNAL(configUpdated()), mainWindow, SLOT(updateToolsValues()));
             connect(this, SIGNAL(configUpdated()), mainWindow, SLOT(updateSmartcardValues()));
 
-            QtConcurrent::run(this, &FDOTool::doMain);
-
             break;
 
+            /*
         case ODOO:
             processWindow->show();
 
@@ -125,6 +122,7 @@ int FDOTool::run() {
             QtConcurrent::run(this, &FDOTool::doOdoo);
 
             break;
+             */
     }
 
     return QApplication::exec();
@@ -140,10 +138,6 @@ void FDOTool::doWaitAndClose(bool wait) {
 
     closeAllWindows();
     exit();
-}
-
-void FDOTool::doMain() {
-
 }
 
 void FDOTool::doOdoo() {
