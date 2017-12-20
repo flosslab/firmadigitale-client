@@ -7,6 +7,9 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <fdosettings.hpp>
+#include "certificate.hpp"
+
+#define FDOTOOL_SIGNER_DIGISIGNER_TEMFILE_PREFIX "tmpdigisigner"
 
 class DigiSigner : public QObject {
 Q_OBJECT
@@ -21,11 +24,14 @@ public:
 
     QByteArray cadesSign(const QByteArray &inputData);
 
-    static QString getCertId();
+    QString getCertId();
 
-    static QString getCert(QString id);
+    QString getCert(QString id);
 
 private:
+
+    FDOSettings *settings;
+
     QString certificateId;
     QString certificate;
     QString pin;

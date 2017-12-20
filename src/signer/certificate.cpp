@@ -4,10 +4,21 @@
 #include <QtNetwork/QSslCertificate>
 
 CertificateUtility::CertificateUtility(QObject *parent) : QObject(parent) {
-    settings = FDOSettings::getInstance();
 }
 
 void CertificateUtility::getCertificateId() {
+    QString certificateId = getCertificateIdSync();
+    emit newCertificateId(certificateId);
+}
+
+void CertificateUtility::getCertificate(QString id) {
+    QString certificate = getCertificateSync(id);
+    emit newCertificate(certificate);
+}
+
+QString CertificateUtility::getCertificateIdSync() {
+    FDOSettings *settings = FDOSettings::getInstance();
+
     QStringList arguments;
     arguments << "--module" << settings->getSmartcardLib();
     arguments << "--list-objects";
@@ -17,10 +28,8 @@ void CertificateUtility::getCertificateId() {
     process.start(settings->getPkcsToolBin(), arguments);
     process.waitForStarted();
     process.waitForFinished();
-    if (process.exitStatus() != QProcess::NormalExit) {
-        emit newCertificateId("");
-        return;
-    }
+    if (process.exitStatus() != QProcess::NormalExit)
+        return "";
 
     QString rawOutput(process.readAll());
     QStringList lines = rawOutput.split('\n');
@@ -60,16 +69,16 @@ void CertificateUtility::getCertificateId() {
     }
 
     for (const QPair<QString, QString> &certificate: certificates) {
-        if (certificate.first.toLower().contains("firma")) {
-            emit newCertificateId(certificate.second);
-            return;
-        }
+        if (certificate.first.toLower().contains("firma"))
+            return certificate.second;
     }
 
-    emit newCertificateId("");
+    return "";
 }
 
-void CertificateUtility::getCertificate(QString id) {
+QString CertificateUtility::getCertificateSync(const QString &id) {
+    FDOSettings *settings = FDOSettings::getInstance();
+
     QStringList arguments;
     arguments << "--module" << settings->getSmartcardLib();
     arguments << "--read-object";
@@ -80,14 +89,12 @@ void CertificateUtility::getCertificate(QString id) {
     process.start(settings->getPkcsToolBin(), arguments);
     process.waitForStarted();
     process.waitForFinished();
-    if (process.exitStatus() != QProcess::NormalExit) {
-        emit newCertificate("");
-        return;
-    }
+    if (process.exitStatus() != QProcess::NormalExit)
+        return "";
 
     QByteArray certBytes = process.readAll();
 
     QSslCertificate certificate(certBytes, QSsl::Der);
     QString cert = QString(certificate.toPem());
-    emit newCertificate(cert);
+    return cert;
 }

@@ -12,15 +12,15 @@ public:
 
     explicit CertificateUtility(QObject *parent = Q_NULLPTR);
 
+    static QString getCertificateIdSync();
+
+    static QString getCertificateSync(const QString &id);
+
 public slots:
 
     void getCertificateId();
 
     void getCertificate(QString id);
-
-private:
-
-    FDOSettings *settings;
 
 signals:
 
