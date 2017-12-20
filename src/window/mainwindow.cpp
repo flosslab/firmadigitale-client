@@ -1,6 +1,4 @@
-#include <QtCore/QDir>
 #include <digisigner.hpp>
-#include <QtConcurrent/QtConcurrent>
 
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
@@ -10,9 +8,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     settings = FDOSettings::getInstance();
 
+    thread = new QThread();
+
+    certificateUtility = new CertificateUtility();
+    certificateUtility->moveToThread(thread);
+
+    connect(thread, SIGNAL(finished()), certificateUtility, SLOT(deleteLater()));
+    connect(certificateUtility, SIGNAL(newCertificateId(QString)), this, SLOT(handleNewCertificateId(QString)));
+    thread->start();
+
     connect(ui->actionFileExit, SIGNAL(triggered(bool)), this, SLOT(close()));
     connect(ui->actionConfigEdit, SIGNAL(triggered(bool)), this, SIGNAL(showConfig()));
-    connect(ui->actionConfigReload, SIGNAL(triggered(bool)), this, SLOT(updateSmartcardValues()));
+    connect(ui->actionConfigReload, SIGNAL(triggered(bool)), certificateUtility, SLOT(updateSmartcardValues()));
 
     initLineEdits();
     updateToolsValues();
@@ -20,6 +27,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 MainWindow::~MainWindow() {
+    if(thread != nullptr && thread->isRunning()) {
+        thread->requestInterruption();
+        thread->wait();
+        delete thread;
+    }
+
     delete ui;
 }
 
@@ -58,14 +71,12 @@ void MainWindow::updateToolsValues() {
 
 void MainWindow::updateSmartcardValues() {
     updateLineEdit(ui->certIdValue);
-    QtConcurrent::run(this, &MainWindow::doUpdateSmartcardValues);
+    QMetaObject::invokeMethod(certificateUtility, "getCertificateId", Qt::DirectConnection);
 }
 
-void MainWindow::doUpdateSmartcardValues() {
-    QString certId = DigiSigner::getCertId();
-
-    if (certId.length() > 0) {
-        updateLineEdit(ui->certIdValue, certId);
+void MainWindow::handleNewCertificateId(QString certificateId) {
+    if (certificateId.length() > 0) {
+        updateLineEdit(ui->certIdValue, certificateId);
     } else {
         updateLineEdit(ui->certIdValue, "Smart Card not found", true);
     }

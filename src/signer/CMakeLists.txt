@@ -1,6 +1,10 @@
-set(FDOTOOL_SIGNER_ODOO
+set(FDOTOOL_SIGNER_SOURCES
         digisigner.cpp
-        digisigner.hpp)
+        certificate.cpp)
+
+set(FDOTOOL_SIGNER_HEADERS
+        digisigner.hpp
+        certificate.hpp)
 
 find_package(Qt5 REQUIRED COMPONENTS
         Core
@@ -9,7 +13,8 @@ find_package(Qt5 REQUIRED COMPONENTS
 include_directories(${CMAKE_BINARY_DIR})
 
 add_library(signer STATIC
-        ${FDOTOOL_SIGNER_ODOO})
+        ${FDOTOOL_SIGNER_SOURCES}
+        ${FDOTOOL_SIGNER_HEADERS})
 
 target_link_libraries(signer
         Qt5::Core

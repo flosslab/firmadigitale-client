@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include <QtWidgets/QLineEdit>
+#include <QThread>
+#include <certificate.hpp>
 
 #include "fdosettings.hpp"
 
@@ -29,11 +31,16 @@ private:
 
     FDOSettings *settings;
 
+    QThread *thread;
+    CertificateUtility *certificateUtility;
+
     void updateLineEdit(QLineEdit *lineEdit, const QString &text = "", bool error = false);
 
     void initLineEdits();
 
-    void doUpdateSmartcardValues();
+private slots:
+
+    void handleNewCertificateId(QString certificateId);
 
 signals:
 
