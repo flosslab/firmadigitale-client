@@ -1,16 +1,23 @@
+#include "odooworker.hpp"
+
 #include <QEventLoop>
 #include <QNetworkReply>
 #include <QtCore/QJsonObject>
 #include <QtCore/QJsonDocument>
-#include <QtCore/QThread>
 #include <QtCore/QJsonArray>
 #include <QtWidgets/QInputDialog>
 
-#include "odooworker.hpp"
 #include "digisigner.hpp"
 
-OdooWorker::OdooWorker(QObject *parent) : QObject(parent) {
+OdooWorker::OdooWorker(const QList<Action> &actions, QObject *parent) : QThread(parent) {
+    this->actions = actions;
+}
 
+void OdooWorker::run() {
+    for (const auto &action : actions) {
+        if (!doAction(action))
+            return;
+    }
 }
 
 bool OdooWorker::doAction(Action action) {

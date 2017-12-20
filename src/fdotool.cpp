@@ -21,8 +21,6 @@ FDOTool::FDOTool(int &argc, char **argv) : QApplication(argc, argv) {
     SettingsManager::load();
     SettingsManager::save();
 
-    odooWorker = new OdooWorker();
-
     mainWindow = new MainWindow();
     processWindow = new ProcessWindow();
 
@@ -32,10 +30,15 @@ FDOTool::FDOTool(int &argc, char **argv) : QApplication(argc, argv) {
 }
 
 FDOTool::~FDOTool() {
-    delete odooWorker;
-
     delete mainWindow;
     delete processWindow;
+
+    if (odooWorker != nullptr && odooWorker->isRunning()) {
+        odooWorker->quit();
+        odooWorker->wait();
+    }
+
+    delete odooWorker;
 }
 
 void FDOTool::parseCommandLine() {
@@ -102,9 +105,16 @@ int FDOTool::run() {
 
             break;
 
-            /*
         case ODOO:
             processWindow->show();
+
+            odooWorker = new OdooWorker(actions, this);
+
+            connect(processWindow, SIGNAL(finished(int)), odooWorker, SLOT(quit()));
+
+            connect(odooWorker, SIGNAL(finished()), processWindow, SLOT(iconCompleted()));
+            connect(odooWorker, SIGNAL(finished()), this, SLOT(waitAndClose()));
+            connect(odooWorker, SIGNAL(finished()), odooWorker, SLOT(deleteLater()));
 
             connect(odooWorker, SIGNAL(rpcError(QString, QString)), processWindow, SLOT(rpcError(QString, QString)));
 
@@ -115,21 +125,18 @@ int FDOTool::run() {
             connect(odooWorker, SIGNAL(updateUser(QString)), processWindow, SLOT(updateUser(QString)));
             connect(odooWorker, SIGNAL(updateJobs(int)), processWindow, SLOT(updateJobs(int)));
 
-            connect(odooWorker, SIGNAL(workCompleted()), processWindow, SLOT(iconCompleted()));
-
             processWindow->iconWorking();
 
-            QtConcurrent::run(this, &FDOTool::doOdoo);
+            odooWorker->start();
 
             break;
-             */
     }
 
     return QApplication::exec();
 }
 
 void FDOTool::waitAndClose() {
-    QtConcurrent::run(this, &FDOTool::doWaitAndClose, false);
+    QtConcurrent::run(this, &FDOTool::doWaitAndClose, true);
 }
 
 void FDOTool::doWaitAndClose(bool wait) {
@@ -138,21 +145,6 @@ void FDOTool::doWaitAndClose(bool wait) {
 
     closeAllWindows();
     exit();
-}
-
-void FDOTool::doOdoo() {
-    bool result = true;
-    for (const auto &action : actions) {
-        result = odooWorker->doAction(action);
-
-        if (!result) {
-            connect(processWindow, SIGNAL(waitAndClose()), this, SLOT(waitAndClose()));
-            break;
-        }
-    }
-
-    if (result)
-        doWaitAndClose(true);
 }
 
 void FDOTool::showConfig() {

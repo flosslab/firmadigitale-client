@@ -2,6 +2,8 @@
 #define __FDOTOOL_WORKER_ODOOWORKER_H
 
 #include <QtCore/QObject>
+#include <QtCore/QList>
+#include <QtCore/QThread>
 #include <QtNetwork/QNetworkAccessManager>
 
 #include "../action.hpp"
@@ -13,16 +15,23 @@
 #define FDOTOOL_ODOOWORKER_API_GETATTACHMENT "/fdo/1/action/getAttachment"
 #define FDOTOOL_ODOOWORKER_API_UPLOADSIGNED "/fdo/1/action/uploadSigned"
 
-class OdooWorker : public QObject {
+class OdooWorker : public QThread {
 Q_OBJECT
 
 public:
 
-    explicit OdooWorker(QObject *parent = Q_NULLPTR);
+    explicit OdooWorker(const QList<Action> &actions, QObject *parent = Q_NULLPTR);
+
+protected:
+
+    void run() override;
+
+public:
 
     bool doAction(Action action);
 
 private:
+    QList<Action> actions;
     QString odooUrl;
     QString token;
     int progress;
