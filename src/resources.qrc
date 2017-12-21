@@ -8,5 +8,6 @@
     <qresource prefix="/status">
         <file alias="loading">../icons/status/loading.svg</file>
         <file alias="completed">../icons/status/completed.svg</file>
+        <file alias="error">../icons/status/error.svg</file>
     </qresource>
 </RCC>
