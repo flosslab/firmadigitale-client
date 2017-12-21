@@ -76,16 +76,19 @@ elseif (APPLE)
             COMMAND macdeployqt $<TARGET_FILE:fdotool> ${FDOTOOL_DEPLOYQT_TYPE} --dir ${PROJECT_BINARY_DIR}/windeployqt)
 endif ()
 
-if (UNIX)
-    set(FDOTOOL_TARGET_FDOTOOL_INSTALL_DIR ${CMAKE_INSTALL_BINDIR})
+if (WIN32)
+    install(TARGETS fdotool
+            RUNTIME DESTINATION "."
+            COMPONENT fdotool)
+elseif (APPLE)
+    install(TARGETS fdotool
+            BUNDLE DESTINATION .
+            COMPONENT fdotool)
 else ()
-    set(FDOTOOL_TARGET_FDOTOOL_INSTALL_DIR ".")
+    install(TARGETS fdotool
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            COMPONENT fdotool)
 endif ()
-
-install(TARGETS fdotool
-        RUNTIME
-        DESTINATION ${FDOTOOL_TARGET_FDOTOOL_INSTALL_DIR}
-        COMPONENT fdotool)
 
 if (WIN32 OR APPLE)
     install(DIRECTORY ${PROJECT_BINARY_DIR}/windeployqt/
