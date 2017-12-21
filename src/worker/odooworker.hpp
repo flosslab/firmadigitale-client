@@ -26,16 +26,14 @@ protected:
 
     void run() override;
 
-public:
-
-    bool doAction(Action action);
-
 private:
     QList<Action> actions;
     QString odooUrl;
     QString token;
     int progress;
     int progressMax;
+
+    bool doAction(Action action);
 
     QString getPinFromUser();
 
@@ -64,6 +62,8 @@ signals:
     void updateJobs(int jobs);
 
     void workCompleted();
+
+    void workError();
 };
 
 #endif

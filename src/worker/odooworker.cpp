@@ -15,8 +15,10 @@ OdooWorker::OdooWorker(const QList<Action> &actions, QObject *parent) : QThread(
 
 void OdooWorker::run() {
     for (const auto &action : actions) {
-        if (!doAction(action))
+        if (!doAction(action)) {
+            emit workError();
             return;
+        }
     }
 }
 
@@ -154,6 +156,8 @@ QString OdooWorker::getPinFromUser() {
     inputDialog->setWindowModality(Qt::ApplicationModal);
     inputDialog->setInputMode(QInputDialog::TextInput);
     inputDialog->setTextEchoMode(QLineEdit::Password);
+    inputDialog->setWindowTitle(tr("Smart Card PIN"));
+    inputDialog->setLabelText(tr("Please enter your PIN number"));
     inputDialog->exec();
 
     QString pin = inputDialog->textValue();

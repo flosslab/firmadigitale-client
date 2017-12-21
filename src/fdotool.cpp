@@ -32,13 +32,6 @@ FDOTool::FDOTool(int &argc, char **argv) : QApplication(argc, argv) {
 FDOTool::~FDOTool() {
     delete mainWindow;
     delete processWindow;
-
-    if (odooWorker != nullptr && odooWorker->isRunning()) {
-        odooWorker->quit();
-        odooWorker->wait();
-    }
-
-    delete odooWorker;
 }
 
 void FDOTool::parseCommandLine() {
@@ -108,13 +101,16 @@ int FDOTool::run() {
         case ODOO:
             processWindow->show();
 
-            odooWorker = new OdooWorker(actions, this);
+            auto *odooWorker = new OdooWorker(actions, this);
 
             connect(processWindow, SIGNAL(finished(int)), odooWorker, SLOT(quit()));
 
-            connect(odooWorker, SIGNAL(finished()), processWindow, SLOT(iconCompleted()));
-            connect(odooWorker, SIGNAL(finished()), this, SLOT(waitAndClose()));
             connect(odooWorker, SIGNAL(finished()), odooWorker, SLOT(deleteLater()));
+
+            connect(odooWorker, SIGNAL(workCompleted()), processWindow, SLOT(iconCompleted()));
+            connect(odooWorker, SIGNAL(workCompleted()), this, SLOT(waitAndClose()));
+
+            connect(odooWorker, SIGNAL(workError()), processWindow, SLOT(iconError()));
 
             connect(odooWorker, SIGNAL(rpcError(QString, QString)), processWindow, SLOT(rpcError(QString, QString)));
 
@@ -136,13 +132,17 @@ int FDOTool::run() {
 }
 
 void FDOTool::waitAndClose() {
-    QtConcurrent::run(this, &FDOTool::doWaitAndClose, true);
+    auto *timer = new QTimer();
+
+    connect(timer, SIGNAL(timeout()), timer, SLOT(deleteLater()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(doClose()));
+
+    timer->setInterval(2000);
+    timer->setSingleShot(true);
+    timer->start();
 }
 
-void FDOTool::doWaitAndClose(bool wait) {
-    if (wait)
-        QThread::sleep(2);
-
+void FDOTool::doClose() {
     closeAllWindows();
     exit();
 }

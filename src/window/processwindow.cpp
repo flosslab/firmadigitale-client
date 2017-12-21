@@ -31,8 +31,7 @@ void ProcessWindow::handleClose() {
 
 void ProcessWindow::rpcError(QString title, QString message) {
     QMessageBox::critical(this, title, message);
-
-    emit waitAndClose();
+    close();
 }
 
 void ProcessWindow::updateProgress(int value, int max) {
@@ -83,4 +82,8 @@ void ProcessWindow::iconWorking() {
 
 void ProcessWindow::iconCompleted() {
     svgWidget->load(QString(":/status/completed"));
+}
+
+void ProcessWindow::iconError() {
+    svgWidget->load(QString(":/status/error"));
 }

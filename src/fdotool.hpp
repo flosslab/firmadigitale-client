@@ -36,16 +36,15 @@ private:
     FDOMode mode;
     QList<Action> actions;
 
-    OdooWorker *odooWorker;
-
     MainWindow *mainWindow;
     ProcessWindow *processWindow;
 
-    void doWaitAndClose(bool wait = false);
 
 private slots:
 
     void waitAndClose();
+
+    void doClose();
 
     void showConfig();
 

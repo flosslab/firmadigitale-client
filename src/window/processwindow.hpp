@@ -34,6 +34,8 @@ public slots:
 
     void iconCompleted();
 
+    void iconError();
+
 private:
 
     Ui::ProcessWindow *ui;
