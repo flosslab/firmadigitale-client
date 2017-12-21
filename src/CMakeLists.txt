@@ -78,7 +78,7 @@ endif ()
 
 if (WIN32)
     install(TARGETS fdotool
-            RUNTIME DESTINATION "."
+            RUNTIME DESTINATION .
             COMPONENT fdotool)
 elseif (APPLE)
     install(TARGETS fdotool
@@ -92,6 +92,6 @@ endif ()
 
 if (WIN32 OR APPLE)
     install(DIRECTORY ${PROJECT_BINARY_DIR}/windeployqt/
-            DESTINATION ${FDOTOOL_TARGET_FDOTOOL_INSTALL_DIR}
+            DESTINATION .
             COMPONENT qtlibs)
 endif ()
