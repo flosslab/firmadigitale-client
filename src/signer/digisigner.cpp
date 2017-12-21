@@ -211,12 +211,9 @@ QStringList DigiSigner::readReponse(QProcess &process) {
 }
 
 bool DigiSigner::responseContains(QStringList response, QString text) {
-    for (const QString &item: response) {
-        std::string itemStr = item.toStdString();
-        std::cout << itemStr << "\n";
+    for (const QString &item: response)
         if (item.contains(text))
             return true;
-    }
 
     return false;
 }
