@@ -9,7 +9,7 @@
 #define FDOTOOL_TOOLS_PKCSENGINE_LIB_NAME "opensc-pkcs11.dll"
 #define FDOTOOL_TOOLS_OPENSSL_BIN_NAME "openssl.exe"
 #define FDOTOOL_TOOLS_SMARTCARD_LIB_NAME "bit4xpki.dll"
-#elif Q_OS_MAC
+#elif defined Q_OS_MAC
 #define FDOTOOL_TOOLS_PKCSTOOL_BIN_NAME "pkcs11-tool"
 #define FDOTOOL_TOOLS_PKCSENGINE_LIB_NAME "opensc-pkcs11.so"
 #define FDOTOOL_TOOLS_OPENSSL_BIN_NAME "openssl"

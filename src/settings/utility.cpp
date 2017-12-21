@@ -41,7 +41,7 @@ QString PathUtility::discoverPkcsEngineLib() {
 #ifdef Q_OS_WIN32
     searchPath << "C:\\Windows\\SysWOW64\\opensc-pkcs11.dll";
     searchPath << "C:\\Windows\\System32\\opensc-pkcs11.dll";
-#elif Q_OS_MAC
+#elif defined Q_OS_MAC
     searchPath << "opensc-pkcs11.dylib";
 #else
     QStringList args;
@@ -77,7 +77,7 @@ QString PathUtility::discoverOpenSSLBin() {
 #ifdef Q_OS_WIN32
     searchPath << "C:\\Windows\\SysWOW64\\opensc-pkcs11.dll";
     searchPath << "C:\\Windows\\System32\\opensc-pkcs11.dll";
-#elif Q_OS_MAC
+#elif defined Q_OS_MAC
     searchPath << "opensc-pkcs11.dylib";
 #else
     searchPath.append(installDir.absoluteFilePath(FDOTOOL_TOOLS_OPENSSL_BIN_NAME));
@@ -97,7 +97,7 @@ QString PathUtility::discoverSmartcardLib() {
 
 #ifdef Q_OS_WIN32
     searchPath.append(installDir.absoluteFilePath(FDOTOOL_TOOLS_INSTALL_DIR));
-#elif Q_OS_MAC
+#elif defined Q_OS_MAC
     searchPath.append(installDir.absoluteFilePath(FDOTOOL_TOOLS_INSTALL_DIR));
 #else
     searchPath.append(installDir.absoluteFilePath(FDOTOOL_TOOLS_SMARTCARD_LIB_NAME));
