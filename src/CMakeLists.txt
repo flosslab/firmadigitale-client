@@ -56,8 +56,6 @@ target_link_libraries(fdotool
         worker
         window)
 
-file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/windeployqt)
-
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(FDOTOOL_DEPLOYQT_TYPE "--debug")
 else ()
@@ -65,6 +63,7 @@ else ()
 endif ()
 
 if (WIN32)
+    file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/windeployqt)
     add_custom_command(TARGET fdotool
             POST_BUILD
             COMMAND ${QT5_PREFIX}/bin/windeployqt.exe $<TARGET_FILE:fdotool> ${FDOTOOL_DEPLOYQT_TYPE} --dir ${PROJECT_BINARY_DIR}/windeployqt)
