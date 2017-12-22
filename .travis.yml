@@ -40,7 +40,7 @@ matrix:
 script:
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake .. -DQT5_PREFIX=${QTDIR}
   - make
 after_script:
   - ctest
