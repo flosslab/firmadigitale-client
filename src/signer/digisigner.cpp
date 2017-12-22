@@ -3,7 +3,6 @@
 #include <QtCore/QTemporaryFile>
 #include <QtCore/QThread>
 #include <QtNetwork/QSslCertificate>
-#include <iostream>
 
 DigiSigner::DigiSigner(QObject *parent) : QObject(parent) {
     settings = FDOSettings::getInstance();

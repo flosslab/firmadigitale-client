@@ -3,6 +3,10 @@
 #include <QtConcurrent/QtConcurrent>
 #include <window/configdialog.hpp>
 #include <settings/manager.hpp>
+#include <window/mainwindow.hpp>
+#include <worker/odooworker.hpp>
+#include <window/processwindow.hpp>
+#include <QtWidgets/QInputDialog>
 
 #include "fdotool.hpp"
 
@@ -21,17 +25,9 @@ FDOTool::FDOTool(int &argc, char **argv) : QApplication(argc, argv) {
     SettingsManager::load();
     SettingsManager::save();
 
-    mainWindow = new MainWindow();
-    processWindow = new ProcessWindow();
-
     mode = MAIN;
 
     actions.clear();
-}
-
-FDOTool::~FDOTool() {
-    delete mainWindow;
-    delete processWindow;
 }
 
 void FDOTool::parseCommandLine() {
@@ -89,46 +85,70 @@ int FDOTool::run() {
     switch (mode) {
 
         case MAIN:
-            mainWindow->show();
-
-            connect(mainWindow, SIGNAL(showConfig()), this, SLOT(showConfig()));
-
-            connect(this, SIGNAL(configUpdated()), mainWindow, SLOT(updateToolsValues()));
-            connect(this, SIGNAL(configUpdated()), mainWindow, SLOT(updateSmartcardValues()));
-
+            runMain();
             break;
 
         case ODOO:
-            processWindow->show();
-
-            auto *odooWorker = new OdooWorker(actions, this);
-
-            connect(processWindow, SIGNAL(finished(int)), odooWorker, SLOT(quit()));
-
-            connect(odooWorker, SIGNAL(finished()), odooWorker, SLOT(deleteLater()));
-
-            connect(odooWorker, SIGNAL(workCompleted()), processWindow, SLOT(iconCompleted()));
-            connect(odooWorker, SIGNAL(workCompleted()), this, SLOT(waitAndClose()));
-
-            connect(odooWorker, SIGNAL(workError()), processWindow, SLOT(iconError()));
-
-            connect(odooWorker, SIGNAL(rpcError(QString, QString)), processWindow, SLOT(rpcError(QString, QString)));
-
-            connect(odooWorker, SIGNAL(updateProgress(int, int)), processWindow, SLOT(updateProgress(int, int)));
-            connect(odooWorker, SIGNAL(updateStep(QString)), processWindow, SLOT(updateStep(QString)));
-
-            connect(odooWorker, SIGNAL(updateAddress(QString)), processWindow, SLOT(updateAddress(QString)));
-            connect(odooWorker, SIGNAL(updateUser(QString)), processWindow, SLOT(updateUser(QString)));
-            connect(odooWorker, SIGNAL(updateJobs(int)), processWindow, SLOT(updateJobs(int)));
-
-            processWindow->iconWorking();
-
-            odooWorker->start();
-
+            runOdoo();
             break;
     }
 
     return QApplication::exec();
+}
+
+void FDOTool::runMain() {
+    auto *window = new MainWindow();
+    connect(window, SIGNAL(finished()), window, SLOT(deleteLater()));
+
+    connect(window, SIGNAL(showConfig()), this, SLOT(showConfig()));
+
+    connect(this, SIGNAL(configUpdated()), window, SLOT(updateToolsValues()));
+    connect(this, SIGNAL(configUpdated()), window, SLOT(updateSmartcardValues()));
+
+    window->show();
+}
+
+void FDOTool::runOdoo() {
+    auto *window = new ProcessWindow();
+    connect(window, SIGNAL(finished()), window, SLOT(deleteLater()));
+
+    auto *worker = new OdooWorker(actions, this);
+    connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
+
+    connect(window, SIGNAL(finished(int)), worker, SLOT(quit()));
+
+    connect(worker, SIGNAL(workCompleted()), window, SLOT(iconCompleted()));
+    connect(worker, SIGNAL(workCompleted()), this, SLOT(waitAndClose()));
+
+    connect(worker, SIGNAL(workError()), window, SLOT(iconError()));
+
+    connect(worker, SIGNAL(rpcError(QString, QString)), window, SLOT(rpcError(QString, QString)));
+
+    connect(worker, SIGNAL(updateProgress(int, int)), window, SLOT(updateProgress(int, int)));
+    connect(worker, SIGNAL(updateStep(QString)), window, SLOT(updateStep(QString)));
+
+    connect(worker, SIGNAL(updateAddress(QString)), window, SLOT(updateAddress(QString)));
+    connect(worker, SIGNAL(updateUser(QString)), window, SLOT(updateUser(QString)));
+    connect(worker, SIGNAL(updateJobs(int)), window, SLOT(updateJobs(int)));
+
+    window->iconWorking();
+    window->show();
+
+    worker->start();
+}
+
+QString FDOTool::getPinFromUser() {
+    QInputDialog inputDialog;
+    inputDialog.setWindowModality(Qt::ApplicationModal);
+    inputDialog.setInputMode(QInputDialog::TextInput);
+    inputDialog.setTextEchoMode(QLineEdit::Password);
+    inputDialog.setWindowTitle(tr("Smart Card PIN"));
+    inputDialog.setLabelText(tr("Please enter your PIN number"));
+    inputDialog.exec();
+
+    QString pin = inputDialog.textValue();
+
+    return pin;
 }
 
 void FDOTool::waitAndClose() {

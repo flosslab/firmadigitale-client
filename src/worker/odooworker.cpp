@@ -152,18 +152,8 @@ bool OdooWorker::doAction(Action action) {
 }
 
 QString OdooWorker::getPinFromUser() {
-    QInputDialog *inputDialog = new QInputDialog();
-    inputDialog->setWindowModality(Qt::ApplicationModal);
-    inputDialog->setInputMode(QInputDialog::TextInput);
-    inputDialog->setTextEchoMode(QLineEdit::Password);
-    inputDialog->setWindowTitle(tr("Smart Card PIN"));
-    inputDialog->setLabelText(tr("Please enter your PIN number"));
-    inputDialog->exec();
-
-    QString pin = inputDialog->textValue();
-
-    delete inputDialog;
-
+    QString pin;
+    QMetaObject::invokeMethod(parent(), "getPinFromUser", Qt::BlockingQueuedConnection, Q_RETURN_ARG(QString, pin));
     return pin;
 }
 
