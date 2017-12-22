@@ -22,11 +22,18 @@ void OdooWorker::run() {
     }
 }
 
+void OdooWorker::stop() {
+    requestInterruption();
+}
+
 bool OdooWorker::doAction(Action action) {
     QVariantMap request;
     QVariantMap response;
 
     workerProgress("Starting action", true);
+
+    if (QThread::currentThread()->isInterruptionRequested())
+        return false;
 
     QThread::msleep(500);
 
@@ -35,6 +42,9 @@ bool OdooWorker::doAction(Action action) {
     odooUrl = action.getOdooUrl();
     token = action.getToken();
     emit updateAddress(odooUrl);
+
+    if (QThread::currentThread()->isInterruptionRequested())
+        return false;
 
     QThread::msleep(500);
 
@@ -69,8 +79,14 @@ bool OdooWorker::doAction(Action action) {
     connect(&digiSigner, SIGNAL(progressStep(QString)), this, SLOT(workerProgress(QString)));
     connect(&digiSigner, SIGNAL(error(QString)), this, SLOT(workerError(QString)));
 
+    if (QThread::currentThread()->isInterruptionRequested())
+        return false;
+
     workerProgress("Initializing smart card");
     if (!digiSigner.initCard())
+        return false;
+
+    if (QThread::currentThread()->isInterruptionRequested())
         return false;
 
     workerProgress("Setting pin");
@@ -83,6 +99,9 @@ bool OdooWorker::doAction(Action action) {
     digiSigner.setPin(pin);
 
     for (const auto &job : jobsList) {
+        if (QThread::currentThread()->isInterruptionRequested())
+            return false;
+
         qulonglong jobId = job.toULongLong();
 
         workerProgress(QString("Getting job %1").arg(jobId));
@@ -105,6 +124,9 @@ bool OdooWorker::doAction(Action action) {
 
         workerProgress(QString("Getting attachment %1, action to do: %2").arg(attachmentId).arg(actionToDo));
 
+        if (QThread::currentThread()->isInterruptionRequested())
+            return false;
+
         request.clear();
         request.insert("token", token);
         request.insert("jobId", jobId);
@@ -123,12 +145,18 @@ bool OdooWorker::doAction(Action action) {
 
         workerProgress(QString("Attachment %1 is %2 bytes").arg(jobId).arg(content.length()));
 
+        if (QThread::currentThread()->isInterruptionRequested())
+            return false;
+
         if (actionToDo == "sign") {
             QByteArray signedContent = digiSigner.cadesSign(content);
             if (signedContent.isEmpty())
                 return false;
 
             workerProgress(QString("Signed file is %1 bytes, uploading result to Odoo").arg(signedContent.length()));
+
+            if (QThread::currentThread()->isInterruptionRequested())
+                return false;
 
             request.clear();
             request.insert("token", token);

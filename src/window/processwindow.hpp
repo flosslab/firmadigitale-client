@@ -36,6 +36,10 @@ public slots:
 
     void iconError();
 
+protected:
+
+    void closeEvent(QCloseEvent *event) override;
+
 private:
 
     Ui::ProcessWindow *ui;
@@ -49,6 +53,8 @@ private slots:
     void handleClose();
 
 signals:
+
+    void windowClose();
 
     void waitAndClose();
 };

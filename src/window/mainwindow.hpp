@@ -26,6 +26,10 @@ public slots:
 
     void updateToolsValues();
 
+protected:
+
+    void closeEvent(QCloseEvent *event) override;
+
 private:
     Ui::MainWindow *ui;
 
@@ -43,6 +47,8 @@ private slots:
     void handleNewCertificateId(QString certificateId);
 
 signals:
+
+    void windowClose();
 
     void showConfig();
 };

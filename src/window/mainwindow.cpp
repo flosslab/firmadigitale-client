@@ -37,6 +37,11 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
+void MainWindow::closeEvent(QCloseEvent *event) {
+    emit windowClose();
+    QWidget::closeEvent(event);
+}
+
 void MainWindow::updateLineEdit(QLineEdit *lineEdit, const QString &text, bool error) {
     QString align = "left";
     QString color = "black";

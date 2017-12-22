@@ -98,7 +98,7 @@ int FDOTool::run() {
 
 void FDOTool::runMain() {
     auto *window = new MainWindow();
-    connect(window, SIGNAL(finished()), window, SLOT(deleteLater()));
+    connect(window, SIGNAL(windowClose()), window, SLOT(deleteLater()));
 
     connect(window, SIGNAL(showConfig()), this, SLOT(showConfig()));
 
@@ -110,23 +110,19 @@ void FDOTool::runMain() {
 
 void FDOTool::runOdoo() {
     auto *window = new ProcessWindow();
-    connect(window, SIGNAL(finished()), window, SLOT(deleteLater()));
+    connect(window, SIGNAL(windowClose()), window, SLOT(deleteLater()));
 
-    auto *worker = new OdooWorker(actions, this);
+    auto *worker = new OdooWorker(actions);
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
 
-    connect(window, SIGNAL(finished(int)), worker, SLOT(quit()));
+    connect(this, SIGNAL(aboutToQuit()), worker, SLOT(stop()));
 
     connect(worker, SIGNAL(workCompleted()), window, SLOT(iconCompleted()));
     connect(worker, SIGNAL(workCompleted()), this, SLOT(waitAndClose()));
-
     connect(worker, SIGNAL(workError()), window, SLOT(iconError()));
-
     connect(worker, SIGNAL(rpcError(QString, QString)), window, SLOT(rpcError(QString, QString)));
-
     connect(worker, SIGNAL(updateProgress(int, int)), window, SLOT(updateProgress(int, int)));
     connect(worker, SIGNAL(updateStep(QString)), window, SLOT(updateStep(QString)));
-
     connect(worker, SIGNAL(updateAddress(QString)), window, SLOT(updateAddress(QString)));
     connect(worker, SIGNAL(updateUser(QString)), window, SLOT(updateUser(QString)));
     connect(worker, SIGNAL(updateJobs(int)), window, SLOT(updateJobs(int)));

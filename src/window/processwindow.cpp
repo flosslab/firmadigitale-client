@@ -21,6 +21,11 @@ ProcessWindow::~ProcessWindow() {
     delete ui;
 }
 
+void ProcessWindow::closeEvent(QCloseEvent *event) {
+    emit windowClose();
+    QWidget::closeEvent(event);
+}
+
 void ProcessWindow::signalConnect() {
     connect(ui->buttonBox->button(QDialogButtonBox::Close), SIGNAL(clicked(bool)), this, SLOT(handleClose()));
 }

@@ -22,6 +22,10 @@ public:
 
     explicit OdooWorker(const QList<Action> &actions, QObject *parent = Q_NULLPTR);
 
+public slots:
+
+    void stop();
+
 protected:
 
     void run() override;
