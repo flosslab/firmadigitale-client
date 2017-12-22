@@ -3,9 +3,9 @@
 
 #define APPLICATION_NAME "FDO Tool"
 #define APPLICATION_NAME_SHORT "fdotool"
-#define APPLICATION_VERSION "0.0.0"
+#define APPLICATION_VERSION "0.9.0"
 
-#define ORGANIZATION_NAME "Seedoo"
-#define ORGANIZATION_DOMAIN "seedoo.it"
+#define ORGANIZATION_NAME "Flosslab"
+#define ORGANIZATION_DOMAIN "flosslab.com"
 
 #endif
