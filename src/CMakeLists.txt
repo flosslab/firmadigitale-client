@@ -73,7 +73,7 @@ elseif (APPLE)
             PROPERTIES MACOSX_BUNDLE_ICON_FILE ${FDOTOOL_MAC_ICON_NAME})
     add_custom_command(TARGET fdotool
             POST_BUILD
-            COMMAND macdeployqt $<TARGET_FILE:fdotool>)
+            COMMAND ${QT5_PREFIX}/bin/macdeployqt $<TARGET_FILE:fdotool>)
 endif ()
 
 if (WIN32)
