@@ -1,14 +1,15 @@
 #include "certificate.hpp"
 
 #include <QtCore/QProcess>
-#include <QtNetwork/QSslCertificate>
+
+#include <fdosettings.hpp>
 
 CertificateUtility::CertificateUtility(QObject *parent) : QObject(parent) {
 }
 
-void CertificateUtility::getCertificateId() {
-    QString certificateId = getCertificateIdSync();
-    emit newCertificateId(certificateId);
+void CertificateUtility::getCertificates() {
+    QMap<QString, QSslCertificate> certificates = getCertificatesSync();
+    emit newCertificates(certificates);
 }
 
 void CertificateUtility::getCertificate(QString id) {
@@ -16,7 +17,9 @@ void CertificateUtility::getCertificate(QString id) {
     emit newCertificate(certificate);
 }
 
-QString CertificateUtility::getCertificateIdSync() {
+QMap<QString, QSslCertificate> CertificateUtility::getCertificatesSync() {
+    QMap<QString, QSslCertificate> certificates;
+
     FDOSettings *settings = FDOSettings::getInstance();
 
     QStringList arguments;
@@ -29,15 +32,16 @@ QString CertificateUtility::getCertificateIdSync() {
     process.waitForStarted();
     process.waitForFinished();
     if (process.exitStatus() != QProcess::NormalExit)
-        return "";
+        return certificates;
 
     QString rawOutput(process.readAll());
     QStringList lines = rawOutput.split('\n');
 
-    QList<QPair<QString, QString>> certificates;
     bool containsCertificate = false;
     QString certificateLabel;
     QString certificateId;
+
+    QStringList certificateIds;
 
     for (const QString &line: lines) {
         if (line.startsWith("Certificate Object") && line.contains("type = X.509 cert")) {
@@ -50,34 +54,29 @@ QString CertificateUtility::getCertificateIdSync() {
         }
 
         if (containsCertificate) {
-            if (line.startsWith("  label:")) {
-                QStringList items = line.trimmed().split(':', QString::SkipEmptyParts);
-                if (items.length() == 2)
-                    certificateLabel = items[1].trimmed();
-            }
             if (line.startsWith("  ID:")) {
                 QStringList items = line.trimmed().split(':', QString::SkipEmptyParts);
                 if (items.length() == 2)
-                    certificateId = items[1].trimmed();
-            }
-
-            if (certificateLabel.length() > 0 && certificateId.length() > 0) {
-                QPair<QString, QString> newCertificate(certificateLabel, certificateId);
-                certificates.append(newCertificate);
+                    certificateIds.append(items[1].trimmed());
             }
         }
     }
 
-    for (const QPair<QString, QString> &certificate: certificates) {
-        if (certificate.first.toLower().contains("firma")
-                || certificate.first.toLower().contains("cns"))
-            return certificate.second;
+    for (const QString &certId: certificateIds) {
+        QSslCertificate sslCertificate = getSSLCertificate(certId);
+        certificates.insert(certId, sslCertificate);
     }
 
-    return "";
+    return certificates;
 }
 
 QString CertificateUtility::getCertificateSync(const QString &id) {
+    QSslCertificate certificate = getSSLCertificate(id);
+    QString cert = QString(certificate.toPem());
+    return cert;
+}
+
+QSslCertificate CertificateUtility::getSSLCertificate(const QString &id) {
     FDOSettings *settings = FDOSettings::getInstance();
 
     QStringList arguments;
@@ -91,11 +90,9 @@ QString CertificateUtility::getCertificateSync(const QString &id) {
     process.waitForStarted();
     process.waitForFinished();
     if (process.exitStatus() != QProcess::NormalExit)
-        return "";
+        return QSslCertificate();
 
     QByteArray certBytes = process.readAll();
-
     QSslCertificate certificate(certBytes, QSsl::Der);
-    QString cert = QString(certificate.toPem());
-    return cert;
+    return certificate;
 }

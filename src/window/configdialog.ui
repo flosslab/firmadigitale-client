@@ -27,7 +27,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="toolsTab">
       <attribute name="title">
@@ -205,6 +205,58 @@
        </item>
        <item row="2" column="1">
         <spacer name="smartcardVerticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="certificateTab">
+      <attribute name="title">
+       <string>Certificate</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,1,0,0">
+       <item row="0" column="0">
+        <widget class="QLabel" name="certificateIdLabel">
+         <property name="text">
+          <string>Certificate ID</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="certificateIdValue"/>
+       </item>
+       <item row="0" column="2">
+        <widget class="QToolButton" name="certificateIdReload">
+         <property name="text">
+          <string>auto</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../resources.qrc">
+           <normaloff>:/buttons/reload</normaloff>:/buttons/reload</iconset>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QToolButton" name="certificateIdAuto">
+         <property name="text">
+          <string>auto</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../resources.qrc">
+           <normaloff>:/buttons/refresh</normaloff>:/buttons/refresh</iconset>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <spacer name="certificateVerticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>

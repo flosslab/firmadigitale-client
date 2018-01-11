@@ -1,18 +1,19 @@
-#include <QtWidgets>
-
 #include "configdialog.hpp"
 #include "ui_configdialog.h"
+
+#include <QtWidgets>
 
 #include <manager.hpp>
 #include <utility.hpp>
 #include <defaults.hpp>
+#include <certificate.hpp>
 
 ConfigDialog::ConfigDialog(QWidget *parent) : QDialog(parent), ui(new Ui::ConfigDialog) {
     ui->setupUi(this);
 
     settings = FDOSettings::getInstance();
 
-    prepare();
+    prepareSmartcardProducerValues();
 
     connect(ui->buttonBox->button(QDialogButtonBox::Ok), SIGNAL(clicked(bool)), this, SLOT(handleOK()));
     connect(ui->buttonBox->button(QDialogButtonBox::Apply), SIGNAL(clicked(bool)), this, SLOT(handleApply()));
@@ -33,6 +34,9 @@ ConfigDialog::ConfigDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Config
     connect(ui->smartcardLibAuto, SIGNAL(clicked(bool)), this, SLOT(handleSmartcardLibAuto()));
 
     connect(ui->smartcardProducerValue, SIGNAL(activated(int)), this, SLOT(searchSmartcardLib()));
+
+    connect(ui->certificateIdReload, SIGNAL(clicked(bool)), this, SLOT(prepareCertificateIdValues()));
+    connect(ui->certificateIdAuto, SIGNAL(clicked(bool)), this, SLOT(handleCertificateIdAuto()));
 
     load();
 }
@@ -58,10 +62,37 @@ void ConfigDialog::handleReset() {
     load();
 }
 
-void ConfigDialog::prepare() {
+void ConfigDialog::prepareSmartcardProducerValues() {
     ui->smartcardProducerValue->clear();
     ui->smartcardProducerValue->addItem("Athena", SETTINGS_SMARTCARD_PRODUCER_ATHENA);
     ui->smartcardProducerValue->addItem("Incard / Oberthur", SETTINGS_SMARTCARD_PRODUCER_INCARDOBERTHUR);
+}
+
+void ConfigDialog::prepareCertificateIdValues() {
+    ui->certificateIdValue->clear();
+    ui->certificateIdValue->addItem("loading...");
+    ui->certificateIdValue->setEnabled(false);
+
+    auto *certificateUtility = new CertificateUtility();
+
+    connect(certificateUtility, SIGNAL(newCertificates(QMap<QString, QSslCertificate>)), this,
+            SLOT(updateCertificateIdValues(QMap<QString, QSslCertificate>)));
+    connect(certificateUtility, SIGNAL(newCertificates(QMap<QString, QSslCertificate>)), certificateUtility,
+            SLOT(deleteLater()));
+
+    QMetaObject::invokeMethod(certificateUtility, "getCertificates", Qt::QueuedConnection);
+}
+
+void ConfigDialog::updateCertificateIdValues(QMap<QString, QSslCertificate> certificates) {
+    ui->certificateIdValue->clear();
+
+    for (const QString &certId : certificates.keys()) {
+        QSslCertificate sslCertificate = certificates.value(certId);
+        QString certificateString = sslCertificate.subjectInfo(QSslCertificate::CommonName).at(0);
+        ui->certificateIdValue->addItem(certificateString, certId);
+    }
+
+    ui->certificateIdValue->setEnabled(true);
 }
 
 void ConfigDialog::load() {
@@ -202,6 +233,10 @@ void ConfigDialog::handleSmartcardLibAuto() {
 
     if (defaultValue.length() == 0)
         QMessageBox::critical(this, "Error finding automatic value", "Unable to find the right value automatically");
+}
+
+void ConfigDialog::handleCertificateIdAuto() {
+    QMessageBox::critical(this, "Error finding automatic value", "Unable to find the right value automatically");
 }
 
 QString ConfigDialog::searchSmartcardLib() {

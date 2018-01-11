@@ -31,6 +31,7 @@ target_link_libraries(window
         Qt5::Gui
         Qt5::Widgets
         Qt5::Svg
+        settings
         signer)
 
 target_include_directories(window PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

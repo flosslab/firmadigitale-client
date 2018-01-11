@@ -9,12 +9,6 @@ DigiSigner::DigiSigner(QObject *parent) : QObject(parent) {
 }
 
 bool DigiSigner::initCard() {
-    certificateId = CertificateUtility::getCertificateIdSync();
-    if (certificateId.length() == 0) {
-        emit error("Smart card not found");
-        return false;
-    }
-
     certificate = CertificateUtility::getCertificateSync(certificateId);
 
     return true;

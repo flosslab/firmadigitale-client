@@ -3,7 +3,8 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QString>
-#include <fdosettings.hpp>
+#include <QtCore/QMap>
+#include <QtNetwork/QSslCertificate>
 
 class CertificateUtility : public QObject {
 Q_OBJECT
@@ -12,19 +13,23 @@ public:
 
     explicit CertificateUtility(QObject *parent = Q_NULLPTR);
 
-    static QString getCertificateIdSync();
-
     static QString getCertificateSync(const QString &id);
+
+    static QMap<QString, QSslCertificate> getCertificatesSync();
 
 public slots:
 
-    void getCertificateId();
+    Q_INVOKABLE void getCertificates();
 
-    void getCertificate(QString id);
+    Q_INVOKABLE void getCertificate(QString id);
+
+private:
+
+    static QSslCertificate getSSLCertificate(const QString &id);
 
 signals:
 
-    void newCertificateId(QString certId);
+    void newCertificates(QMap<QString, QSslCertificate>);
 
     void newCertificate(QString cert);
 };

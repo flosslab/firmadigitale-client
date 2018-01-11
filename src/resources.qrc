@@ -4,6 +4,7 @@
     </qresource>
     <qresource prefix="/buttons">
         <file alias="refresh">../icons/buttons/refresh.svg</file>
+        <file alias="reload">../icons/buttons/reload.svg</file>
     </qresource>
     <qresource prefix="/status">
         <file alias="loading">../icons/status/loading.svg</file>

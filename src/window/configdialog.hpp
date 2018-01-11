@@ -2,6 +2,10 @@
 #define __FDOTOOL_WINDOW_CONFIGDIALOG_H
 
 #include <QDialog>
+#include <QtCore/QString>
+#include <QtCore/QMap>
+#include <QtNetwork/QSslCertificate>
+
 #include <fdosettings.hpp>
 
 namespace Ui {
@@ -14,20 +18,25 @@ Q_OBJECT
 public:
     explicit ConfigDialog(QWidget *parent = nullptr);
 
-    ~ConfigDialog();
+    ~ConfigDialog() override;
 
 private:
     Ui::ConfigDialog *ui;
 
     FDOSettings *settings;
 
-    void prepare();
+    void prepareSmartcardProducerValues();
+
 
     void load();
 
     void save();
 
 private slots:
+
+    void prepareCertificateIdValues();
+
+    void updateCertificateIdValues(QMap<QString, QSslCertificate> certificates);
 
     void handleOK();
 
@@ -54,6 +63,8 @@ private slots:
     void handleSmartcardProducerAuto();
 
     void handleSmartcardLibAuto();
+
+    void handleCertificateIdAuto();
 
     QString searchSmartcardLib();
 };
