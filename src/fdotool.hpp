@@ -27,8 +27,6 @@ public:
 
     explicit FDOTool(int &argc, char **argv);
 
-    ~FDOTool();
-
     void parseCommandLine();
 
     int run();
@@ -38,9 +36,6 @@ public:
 private:
     FDOMode mode;
     QList<Action> actions;
-
-    MainWindow *mainWindow;
-    ProcessWindow *processWindow;
 
     void runMain();
 
