@@ -48,6 +48,8 @@ private:
 
     void signalConnect();
 
+    QString getPinFromUser();
+
 private slots:
 
     void handleClose();
