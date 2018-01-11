@@ -13,7 +13,9 @@ private:
     QString pkcsToolBin;
     QString pkcsEngineLib;
     QString opensslBin;
+    QString smartcardProducer;
     QString smartcardLib;
+    QString certificateId;
 
 public:
     static FDOSettings *getInstance();
@@ -30,9 +32,17 @@ public:
 
     void setOpensslBin(const QString &opensslBin);
 
+    const QString &getSmartcardProducer() const;
+
+    void setSmartcardProducer(const QString &smartcardProducer);
+
     const QString &getSmartcardLib() const;
 
     void setSmartcardLib(const QString &smartcardLib);
+
+    const QString &getCertificateId() const;
+
+    void setCertificateId(const QString &certificateId);
 };
 
 #endif

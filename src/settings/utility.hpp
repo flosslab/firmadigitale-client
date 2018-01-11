@@ -8,20 +8,23 @@
 #define FDOTOOL_TOOLS_PKCSTOOL_BIN_NAME "pkcs11-tool.exe"
 #define FDOTOOL_TOOLS_PKCSENGINE_LIB_NAME "opensc-pkcs11.dll"
 #define FDOTOOL_TOOLS_OPENSSL_BIN_NAME "openssl.exe"
-#define FDOTOOL_TOOLS_SMARTCARD_LIB_NAME "bit4xpki.dll"
+#define FDOTOOL_TOOLS_SMARTCARD_LIB_NAME_ATHENA "asepkcs.dll"
+#define FDOTOOL_TOOLS_SMARTCARD_LIB_NAME_INCARD_OBERTHUR "bit4xpki.dll"
 #elif defined Q_OS_MAC
 #define FDOTOOL_TOOLS_PKCSTOOL_BIN_NAME "pkcs11-tool"
 #define FDOTOOL_TOOLS_PKCSENGINE_LIB_NAME "opensc-pkcs11.so"
 #define FDOTOOL_TOOLS_OPENSSL_BIN_NAME "openssl"
-#define FDOTOOL_TOOLS_SMARTCARD_LIB_NAME "bit4xpki.dll"
+#define FDOTOOL_TOOLS_SMARTCARD_LIB_NAME_ATHENA "asepkcs.dll"
+#define FDOTOOL_TOOLS_SMARTCARD_LIB_NAME_INCARD_OBERTHUR "bit4xpki.dll"
 #else
 #define FDOTOOL_TOOLS_PKCSTOOL_BIN_NAME "pkcs11-tool"
 #define FDOTOOL_TOOLS_PKCSENGINE_LIB_NAME "pkcs11.so"
 #define FDOTOOL_TOOLS_OPENSSL_BIN_NAME "openssl"
-#define FDOTOOL_TOOLS_SMARTCARD_LIB_NAME "libbit4xpki.so"
+#define FDOTOOL_TOOLS_SMARTCARD_LIB_NAME_ATHENA "libAsePkcs.so"
+#define FDOTOOL_TOOLS_SMARTCARD_LIB_NAME_INCARD_OBERTHUR "libbit4xpki.so"
 #endif
 
-class PathUtility {
+class DiscoverUtility {
 
 public:
 
@@ -31,7 +34,9 @@ public:
 
     static QString discoverPkcsEngineLib();
 
-    static QString discoverSmartcardLib();
+    static QString discoverSmartcardLibAthena();
+
+    static QString discoverSmartcardLibIncardOberthur();
 
 private:
 

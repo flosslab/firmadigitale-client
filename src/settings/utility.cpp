@@ -4,7 +4,7 @@
 #include "config.hpp"
 #include "utility.hpp"
 
-QString PathUtility::discoverPkcsToolBin() {
+QString DiscoverUtility::discoverPkcsToolBin() {
     QStringList searchPath;
 
 #ifdef Q_OS_WIN32
@@ -35,7 +35,7 @@ QString PathUtility::discoverPkcsToolBin() {
     return "";
 }
 
-QString PathUtility::discoverPkcsEngineLib() {
+QString DiscoverUtility::discoverPkcsEngineLib() {
     QStringList searchPath;
 
 #ifdef Q_OS_WIN32
@@ -69,19 +69,11 @@ QString PathUtility::discoverPkcsEngineLib() {
     return "";
 }
 
-QString PathUtility::discoverOpenSSLBin() {
+QString DiscoverUtility::discoverOpenSSLBin() {
     QStringList searchPath;
 
-#ifdef Q_OS_WIN32
-    searchPath << "C:\\Windows\\SysWOW64\\opensc-pkcs11.dll";
-    searchPath << "C:\\Windows\\System32\\opensc-pkcs11.dll";
-#elif defined Q_OS_MAC
-    searchPath << "opensc-pkcs11.dylib";
-#else
     QDir installDir(FDOTOOL_TOOLS_INSTALL_DIR);
-
     searchPath.append(installDir.absoluteFilePath(FDOTOOL_TOOLS_OPENSSL_BIN_NAME));
-#endif
 
     for (const QString &path: searchPath)
         if (isValid(path, FDOTOOL_TOOLS_OPENSSL_BIN_NAME))
@@ -90,13 +82,34 @@ QString PathUtility::discoverOpenSSLBin() {
     return "";
 }
 
-QString PathUtility::discoverSmartcardLib() {
+QString DiscoverUtility::discoverSmartcardLibAthena() {
     QStringList searchPath;
 
 #ifdef Q_OS_WIN32
     searchPath << R"(C:\Windows\SysWOW64\asepkcs.dll)";
-    searchPath << R"(C:\Windows\SysWOW64\bit4xpki.dll)";
     searchPath << R"(C:\Windows\System32\asepkcs.dll)";
+#elif defined Q_OS_MAC
+    QDir installDir(FDOTOOL_TOOLS_INSTALL_DIR);
+
+    searchPath.append(installDir.absoluteFilePath(FDOTOOL_TOOLS_INSTALL_DIR));
+#else
+    QDir installDir(FDOTOOL_TOOLS_INSTALL_DIR);
+
+    searchPath.append(installDir.absoluteFilePath(FDOTOOL_TOOLS_SMARTCARD_LIB_NAME));
+#endif
+
+    for (const QString &path: searchPath)
+        if (isValid(path, FDOTOOL_TOOLS_SMARTCARD_LIB_NAME_ATHENA))
+            return path;
+
+    return "";
+}
+
+QString DiscoverUtility::discoverSmartcardLibIncardOberthur() {
+    QStringList searchPath;
+
+#ifdef Q_OS_WIN32
+    searchPath << R"(C:\Windows\SysWOW64\bit4xpki.dll)";
     searchPath << R"(C:\Windows\System32\bit4xpki.dll)";
 #elif defined Q_OS_MAC
     QDir installDir(FDOTOOL_TOOLS_INSTALL_DIR);
@@ -109,13 +122,13 @@ QString PathUtility::discoverSmartcardLib() {
 #endif
 
     for (const QString &path: searchPath)
-        if (isValid(path, FDOTOOL_TOOLS_SMARTCARD_LIB_NAME))
+        if (isValid(path, FDOTOOL_TOOLS_SMARTCARD_LIB_NAME_INCARD_OBERTHUR))
             return path;
 
     return "";
 }
 
-bool PathUtility::isValid(const QString &path, const QString &name) {
+bool DiscoverUtility::isValid(const QString &path, const QString &name) {
     if (path.length() == 0)
         return false;
 

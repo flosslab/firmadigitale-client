@@ -14,7 +14,9 @@ FDOSettings::FDOSettings() {
     pkcsToolBin = SETTINGS_PKCSTOOL_BIN_DEFAULT;
     pkcsEngineLib = SETTINGS_PKCSENGINE_LIB_DEFAULT;
     opensslBin = SETTINGS_OPENSSL_BIN_DEFAULT;
+    smartcardProducer = SETTINGS_SMARTCARD_PRODUCER_DEFAULT;
     smartcardLib = SETTINGS_SMARTCARD_LIB_DEFAULT;
+    certificateId = SETTINGS_CERTIFICATE_ID_DEFAULT;
 }
 
 const QString &FDOSettings::getPkcsToolBin() const {
@@ -41,10 +43,26 @@ void FDOSettings::setOpensslBin(const QString &opensslBin) {
     FDOSettings::opensslBin = opensslBin;
 }
 
+const QString &FDOSettings::getSmartcardProducer() const {
+    return smartcardProducer;
+}
+
+void FDOSettings::setSmartcardProducer(const QString &smartcardProducer) {
+    FDOSettings::smartcardProducer = smartcardProducer;
+}
+
 const QString &FDOSettings::getSmartcardLib() const {
     return smartcardLib;
 }
 
 void FDOSettings::setSmartcardLib(const QString &smartcardLib) {
     FDOSettings::smartcardLib = smartcardLib;
+}
+
+const QString &FDOSettings::getCertificateId() const {
+    return certificateId;
+}
+
+void FDOSettings::setCertificateId(const QString &certificateId) {
+    FDOSettings::certificateId = certificateId;
 }

@@ -21,6 +21,8 @@ private:
 
     FDOSettings *settings;
 
+    void prepare();
+
     void load();
 
     void save();
@@ -49,7 +51,11 @@ private slots:
 
     void handleOpenSSLAuto();
 
-    void handleSmartcardAuto();
+    void handleSmartcardProducerAuto();
+
+    void handleSmartcardLibAuto();
+
+    QString searchSmartcardLib();
 };
 
 #endif

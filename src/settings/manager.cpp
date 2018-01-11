@@ -9,10 +9,15 @@ void SettingsManager::load() {
     QSettings settings;
 
     settings.beginGroup("tools");
-    fdoSettings->setPkcsToolBin(settings.value("pkcsToolBin", PathUtility::discoverPkcsToolBin()).toString());
-    fdoSettings->setPkcsEngineLib(settings.value("pkcsEngineLib", PathUtility::discoverPkcsEngineLib()).toString());
-    fdoSettings->setOpensslBin(settings.value("opensslBin", PathUtility::discoverOpenSSLBin()).toString());
-    fdoSettings->setSmartcardLib(settings.value("smartcardLib", PathUtility::discoverSmartcardLib()).toString());
+    fdoSettings->setPkcsToolBin(settings.value("pkcsToolBin", DiscoverUtility::discoverPkcsToolBin()).toString());
+    fdoSettings->setPkcsEngineLib(settings.value("pkcsEngineLib", DiscoverUtility::discoverPkcsEngineLib()).toString());
+    fdoSettings->setOpensslBin(settings.value("opensslBin", DiscoverUtility::discoverOpenSSLBin()).toString());
+    settings.endGroup();
+
+    settings.beginGroup("smartcard");
+    fdoSettings->setSmartcardProducer(settings.value("smartcardProducer", "").toString());
+    fdoSettings->setSmartcardLib(settings.value("smartcardLib", "").toString());
+    fdoSettings->setCertificateId(settings.value("certificateId", "").toString());
     settings.endGroup();
 }
 
@@ -24,7 +29,12 @@ void SettingsManager::save() {
     settings.setValue("pkcsToolBin", config->getPkcsToolBin());
     settings.setValue("pkcsEngineLib", config->getPkcsEngineLib());
     settings.setValue("opensslBin", config->getOpensslBin());
+    settings.endGroup();
+
+    settings.beginGroup("smartcard");
+    settings.setValue("smartcardProducer", config->getSmartcardProducer());
     settings.setValue("smartcardLib", config->getSmartcardLib());
+    settings.setValue("certificateId", config->getCertificateId());
     settings.endGroup();
 
     settings.sync();
