@@ -69,7 +69,8 @@ QString CertificateUtility::getCertificateIdSync() {
     }
 
     for (const QPair<QString, QString> &certificate: certificates) {
-        if (certificate.first.toLower().contains("firma"))
+        if (certificate.first.toLower().contains("firma")
+                || certificate.first.toLower().contains("cns"))
             return certificate.second;
     }
 
