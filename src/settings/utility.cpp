@@ -8,8 +8,8 @@ QString PathUtility::discoverPkcsToolBin() {
     QStringList searchPath;
 
 #ifdef Q_OS_WIN32
-    searchPath << "C:\\Program Files (x86)\\OpenSC Project\\OpenSC\\tools\\pkcs11-tool.exe";
-    searchPath << "C:\\Program Files\\OpenSC Project\\OpenSC\\tools\\pkcs11-tool.exe";
+    searchPath << R"(C:\Program Files (x86)\OpenSC Project\OpenSC\tools\pkcs11-tool.exe)";
+    searchPath << R"(C:\Program Files\OpenSC Project\OpenSC\tools\pkcs11-tool.exe)";
 #else
     QStringList args;
     args << "pkcs11-tool";
@@ -39,8 +39,8 @@ QString PathUtility::discoverPkcsEngineLib() {
     QStringList searchPath;
 
 #ifdef Q_OS_WIN32
-    searchPath << "C:\\Windows\\SysWOW64\\opensc-pkcs11.dll";
-    searchPath << "C:\\Windows\\System32\\opensc-pkcs11.dll";
+    searchPath << R"(C:\Windows\SysWOW64\opensc-pkcs11.dll)";
+    searchPath << R"(C:\Windows\System32\opensc-pkcs11.dll)";
 #elif defined Q_OS_MAC
     searchPath << "opensc-pkcs11.dylib";
 #else
@@ -72,14 +72,14 @@ QString PathUtility::discoverPkcsEngineLib() {
 QString PathUtility::discoverOpenSSLBin() {
     QStringList searchPath;
 
-    QDir installDir(FDOTOOL_TOOLS_INSTALL_DIR);
-
 #ifdef Q_OS_WIN32
     searchPath << "C:\\Windows\\SysWOW64\\opensc-pkcs11.dll";
     searchPath << "C:\\Windows\\System32\\opensc-pkcs11.dll";
 #elif defined Q_OS_MAC
     searchPath << "opensc-pkcs11.dylib";
 #else
+    QDir installDir(FDOTOOL_TOOLS_INSTALL_DIR);
+
     searchPath.append(installDir.absoluteFilePath(FDOTOOL_TOOLS_OPENSSL_BIN_NAME));
 #endif
 
@@ -93,13 +93,18 @@ QString PathUtility::discoverOpenSSLBin() {
 QString PathUtility::discoverSmartcardLib() {
     QStringList searchPath;
 
+#ifdef Q_OS_WIN32
+    searchPath << R"(C:\Windows\SysWOW64\asepkcs.dll)";
+    searchPath << R"(C:\Windows\SysWOW64\bit4xpki.dll)";
+    searchPath << R"(C:\Windows\System32\asepkcs.dll)";
+    searchPath << R"(C:\Windows\System32\bit4xpki.dll)";
+#elif defined Q_OS_MAC
     QDir installDir(FDOTOOL_TOOLS_INSTALL_DIR);
 
-#ifdef Q_OS_WIN32
-    searchPath.append(installDir.absoluteFilePath(FDOTOOL_TOOLS_INSTALL_DIR));
-#elif defined Q_OS_MAC
     searchPath.append(installDir.absoluteFilePath(FDOTOOL_TOOLS_INSTALL_DIR));
 #else
+    QDir installDir(FDOTOOL_TOOLS_INSTALL_DIR);
+
     searchPath.append(installDir.absoluteFilePath(FDOTOOL_TOOLS_SMARTCARD_LIB_NAME));
 #endif
 
