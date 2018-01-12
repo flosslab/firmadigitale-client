@@ -14,6 +14,7 @@ ConfigDialog::ConfigDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Config
     settings = FDOSettings::getInstance();
 
     prepareSmartcardProducerValues();
+    prepareCertificateIdValues();
 
     connect(ui->buttonBox->button(QDialogButtonBox::Ok), SIGNAL(clicked(bool)), this, SLOT(handleOK()));
     connect(ui->buttonBox->button(QDialogButtonBox::Apply), SIGNAL(clicked(bool)), this, SLOT(handleApply()));
@@ -105,20 +106,31 @@ void ConfigDialog::updateCertificateIdValues(QMap<QString, QSslCertificate> cert
     }
 
     ui->certificateIdValue->setEnabled(true);
+
+    QString certId = settings->getCertificateId();
+    int index = ui->certificateIdValue->findData(certId);
+    if (index != -1)
+        ui->smartcardProducerValue->setCurrentIndex(index);
 }
 
 void ConfigDialog::load() {
+    int index;
+
     SettingsManager::load();
 
     ui->pkcsToolBinValue->setText(settings->getPkcsToolBin());
     ui->pkcsEngineLibValue->setText(settings->getPkcsEngineLib());
     ui->opensslBinValue->setText(settings->getOpensslBin());
 
-    int index = ui->smartcardProducerValue->findData(settings->getSmartcardProducer());
+    index = ui->smartcardProducerValue->findData(settings->getSmartcardProducer());
     if (index != -1)
         ui->smartcardProducerValue->setCurrentIndex(index);
 
     ui->smartcardLibValue->setText(settings->getSmartcardLib());
+
+    index = ui->certificateIdValue->findData(settings->getCertificateId());
+    if (index != -1)
+        ui->smartcardProducerValue->setCurrentIndex(index);
 }
 
 void ConfigDialog::save() {
@@ -128,6 +140,8 @@ void ConfigDialog::save() {
 
     settings->setSmartcardProducer(ui->smartcardProducerValue->currentData().toString());
     settings->setSmartcardLib(ui->smartcardLibValue->text().trimmed());
+
+    settings->setCertificateId(ui->certificateIdValue->currentData().toString());
 
     SettingsManager::save();
 }
