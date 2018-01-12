@@ -73,14 +73,23 @@ void ConfigDialog::prepareCertificateIdValues() {
     ui->certificateIdValue->addItem("loading...");
     ui->certificateIdValue->setEnabled(false);
 
+    auto *thread = new QThread();
     auto *certificateUtility = new CertificateUtility();
+    certificateUtility->moveToThread(thread);
 
-    connect(certificateUtility, SIGNAL(newCertificates(QMap<QString, QSslCertificate>)), this,
-            SLOT(updateCertificateIdValues(QMap<QString, QSslCertificate>)));
-    connect(certificateUtility, SIGNAL(newCertificates(QMap<QString, QSslCertificate>)), certificateUtility,
-            SLOT(deleteLater()));
+    qRegisterMetaType<QMap<QString, QSslCertificate>>();
 
-    QMetaObject::invokeMethod(certificateUtility, "getCertificates", Qt::QueuedConnection);
+    connect(thread, SIGNAL(finished()), certificateUtility, SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+
+    connect(certificateUtility, SIGNAL(newCertificates(QMap<QString, QSslCertificate>)),
+            this, SLOT(updateCertificateIdValues(QMap<QString, QSslCertificate>)));
+
+    connect(certificateUtility, SIGNAL(newCertificates(QMap<QString, QSslCertificate>)), thread, SLOT(quit()));
+
+    thread->start();
+
+    QMetaObject::invokeMethod(certificateUtility, "getCertificates");
 }
 
 void ConfigDialog::updateCertificateIdValues(QMap<QString, QSslCertificate> certificates) {
@@ -88,8 +97,11 @@ void ConfigDialog::updateCertificateIdValues(QMap<QString, QSslCertificate> cert
 
     for (const QString &certId : certificates.keys()) {
         QSslCertificate sslCertificate = certificates.value(certId);
-        QString certificateString = sslCertificate.subjectInfo(QSslCertificate::CommonName).at(0);
-        ui->certificateIdValue->addItem(certificateString, certId);
+        if (sslCertificate.isNull())
+            continue;
+
+        QString certString = sslCertificate.subjectInfo(QSslCertificate::CommonName).at(0);
+        ui->certificateIdValue->addItem(certString, certId);
     }
 
     ui->certificateIdValue->setEnabled(true);
@@ -110,12 +122,12 @@ void ConfigDialog::load() {
 }
 
 void ConfigDialog::save() {
-    settings->setPkcsToolBin(ui->pkcsToolBinValue->text());
-    settings->setPkcsEngineLib(ui->pkcsEngineLibValue->text());
-    settings->setOpensslBin(ui->opensslBinValue->text());
+    settings->setPkcsToolBin(ui->pkcsToolBinValue->text().trimmed());
+    settings->setPkcsEngineLib(ui->pkcsEngineLibValue->text().trimmed());
+    settings->setOpensslBin(ui->opensslBinValue->text().trimmed());
 
     settings->setSmartcardProducer(ui->smartcardProducerValue->currentData().toString());
-    settings->setSmartcardLib(ui->smartcardLibValue->text());
+    settings->setSmartcardLib(ui->smartcardLibValue->text().trimmed());
 
     SettingsManager::save();
 }
