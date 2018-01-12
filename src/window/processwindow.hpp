@@ -14,7 +14,7 @@ Q_OBJECT
 public:
     explicit ProcessWindow(QWidget *parent = nullptr);
 
-    ~ProcessWindow();
+    ~ProcessWindow() override;
 
 public slots:
 
@@ -47,8 +47,6 @@ private:
     QSvgWidget *svgWidget;
 
     void signalConnect();
-
-    QString getPinFromUser();
 
 private slots:
 

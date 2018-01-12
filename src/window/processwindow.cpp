@@ -34,20 +34,6 @@ void ProcessWindow::handleClose() {
     close();
 }
 
-QString ProcessWindow::getPinFromUser() {
-    QInputDialog inputDialog;
-    inputDialog.setWindowModality(Qt::ApplicationModal);
-    inputDialog.setInputMode(QInputDialog::TextInput);
-    inputDialog.setTextEchoMode(QLineEdit::Password);
-    inputDialog.setWindowTitle(tr("Smart Card PIN"));
-    inputDialog.setLabelText(tr("Please enter your PIN number"));
-    inputDialog.exec();
-
-    QString pin = inputDialog.textValue();
-
-    return pin;
-}
-
 void ProcessWindow::rpcError(QString title, QString message) {
     QMessageBox::critical(this, title, message);
     close();
