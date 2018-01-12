@@ -76,14 +76,14 @@ QString CertificateUtility::getCertificateSync(const QString &id) {
     return cert;
 }
 
-QSslCertificate CertificateUtility::getSSLCertificate(const QString &id) {
+QSslCertificate CertificateUtility::getSSLCertificate(const QString &certId) {
     FDOSettings *settings = FDOSettings::getInstance();
 
     QStringList arguments;
     arguments << "--module" << settings->getSmartcardLib();
     arguments << "--read-object";
     arguments << "--type" << "cert";
-    arguments << "--id" << id;
+    arguments << "--id" << certId;
 
     QProcess process;
     process.start(settings->getPkcsToolBin(), arguments);

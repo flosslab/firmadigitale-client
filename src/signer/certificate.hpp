@@ -4,6 +4,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtCore/QMap>
+
 #include <QtNetwork/QSslCertificate>
 
 class CertificateUtility : public QObject {
@@ -25,7 +26,7 @@ public slots:
 
 private:
 
-    static QSslCertificate getSSLCertificate(const QString &id);
+    static QSslCertificate getSSLCertificate(const QString &certId);
 
 signals:
 
