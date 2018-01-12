@@ -17,6 +17,9 @@ void SettingsManager::load() {
     settings.beginGroup("smartcard");
     fdoSettings->setSmartcardProducer(settings.value("smartcardProducer", "").toString());
     fdoSettings->setSmartcardLib(settings.value("smartcardLib", "").toString());
+    settings.endGroup();
+
+    settings.beginGroup("certificate");
     fdoSettings->setCertificateId(settings.value("certificateId", "").toString());
     settings.endGroup();
 }
@@ -34,6 +37,9 @@ void SettingsManager::save() {
     settings.beginGroup("smartcard");
     settings.setValue("smartcardProducer", config->getSmartcardProducer());
     settings.setValue("smartcardLib", config->getSmartcardLib());
+    settings.endGroup();
+
+    settings.beginGroup("certificate");
     settings.setValue("certificateId", config->getCertificateId());
     settings.endGroup();
 
