@@ -28,9 +28,12 @@ QString DiscoverUtility::discoverPkcsToolBin() {
             searchPath.append(line.trimmed());
 #endif
 
-    for (const QString &path: searchPath)
-        if (isValid(path, FDOTOOL_TOOLS_PKCSTOOL_BIN_NAME))
-            return path;
+    for (const QString &path: searchPath) {
+        QFileInfo fileInfo(path);
+        QString absolutePath = fileInfo.absoluteFilePath();
+        if (isValid(absolutePath, FDOTOOL_TOOLS_PKCSTOOL_BIN_NAME))
+            return absolutePath;
+    }
 
     return "";
 }
@@ -62,9 +65,12 @@ QString DiscoverUtility::discoverPkcsEngineLib() {
             searchPath.append(line.trimmed());
 #endif
 
-    for (const QString &path: searchPath)
-        if (isValid(path, FDOTOOL_TOOLS_PKCSENGINE_LIB_NAME))
-            return path;
+    for (const QString &path: searchPath) {
+        QFileInfo fileInfo(path);
+        QString absolutePath = fileInfo.absoluteFilePath();
+        if (isValid(absolutePath, FDOTOOL_TOOLS_PKCSENGINE_LIB_NAME))
+            return absolutePath;
+    }
 
     return "";
 }
@@ -75,9 +81,12 @@ QString DiscoverUtility::discoverOpenSSLBin() {
     QDir installDir(FDOTOOL_TOOLS_INSTALL_DIR);
     searchPath.append(installDir.absoluteFilePath(FDOTOOL_TOOLS_OPENSSL_BIN_NAME));
 
-    for (const QString &path: searchPath)
-        if (isValid(path, FDOTOOL_TOOLS_OPENSSL_BIN_NAME))
-            return path;
+    for (const QString &path: searchPath) {
+        QFileInfo fileInfo(path);
+        QString absolutePath = fileInfo.absoluteFilePath();
+        if (isValid(absolutePath, FDOTOOL_TOOLS_OPENSSL_BIN_NAME))
+            return absolutePath;
+    }
 
     return "";
 }
@@ -98,9 +107,12 @@ QString DiscoverUtility::discoverSmartcardLibAthena() {
     searchPath.append(installDir.absoluteFilePath(FDOTOOL_TOOLS_SMARTCARD_LIB_NAME));
 #endif
 
-    for (const QString &path: searchPath)
-        if (isValid(path, FDOTOOL_TOOLS_SMARTCARD_LIB_NAME_ATHENA))
-            return path;
+    for (const QString &path: searchPath) {
+        QFileInfo fileInfo(path);
+        QString absolutePath = fileInfo.absoluteFilePath();
+        if (isValid(absolutePath, FDOTOOL_TOOLS_SMARTCARD_LIB_NAME_ATHENA))
+            return absolutePath;
+    }
 
     return "";
 }
@@ -121,9 +133,12 @@ QString DiscoverUtility::discoverSmartcardLibIncardOberthur() {
     searchPath.append(installDir.absoluteFilePath(FDOTOOL_TOOLS_SMARTCARD_LIB_NAME));
 #endif
 
-    for (const QString &path: searchPath)
-        if (isValid(path, FDOTOOL_TOOLS_SMARTCARD_LIB_NAME_INCARD_OBERTHUR))
-            return path;
+    for (const QString &path: searchPath) {
+        QFileInfo fileInfo(path);
+        QString absolutePath = fileInfo.absoluteFilePath();
+        if (isValid(absolutePath, FDOTOOL_TOOLS_SMARTCARD_LIB_NAME_INCARD_OBERTHUR))
+            return absolutePath;
+    }
 
     return "";
 }
